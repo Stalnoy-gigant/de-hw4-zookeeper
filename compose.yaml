@@ -1,0 +1,38 @@
+# Ансамбль из трёх серверов ZooKeeper 3.9.6. У каждого свой zoo.cfg, свой dataDir с myid и свои порты.
+x-zk: &zk
+  image: zookeeper:3.9.6
+  command: ["zkServer.sh", "start-foreground"]   # штатный скрипт запуска
+  restart: "no"
+  networks: [zknet]
+
+services:
+  zk1:
+    <<: *zk
+    container_name: zk1
+    hostname: zk1
+    environment: { ZOO_DATA_DIR: /var/zookeeper/data1 }
+    ports: ["2181:2181"]
+    volumes:
+      - ./zk/zk1/conf:/conf
+      - ./zk/zk1/data:/var/zookeeper/data1
+  zk2:
+    <<: *zk
+    container_name: zk2
+    hostname: zk2
+    environment: { ZOO_DATA_DIR: /var/zookeeper/data2 }
+    ports: ["2182:2182"]
+    volumes:
+      - ./zk/zk2/conf:/conf
+      - ./zk/zk2/data:/var/zookeeper/data2
+  zk3:
+    <<: *zk
+    container_name: zk3
+    hostname: zk3
+    environment: { ZOO_DATA_DIR: /var/zookeeper/data3 }
+    ports: ["2183:2183"]
+    volumes:
+      - ./zk/zk3/conf:/conf
+      - ./zk/zk3/data:/var/zookeeper/data3
+
+networks:
+  zknet: {}

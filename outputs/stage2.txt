@@ -1,0 +1,80 @@
+### 2026-11-04 13:21:14 запуск ансамбля: docker compose up -d (внутри: zkServer.sh start-foreground)
+ Container zk1 Running 
+ Container zk2 Running 
+ Container zk3 Running 
+NAME      STATUS          PORTS
+zk1       Up 46 seconds   0.0.0.0:2181->2181/tcp, [::]:2181->2181/tcp
+zk2       Up 46 seconds   0.0.0.0:2182->2182/tcp, [::]:2182->2182/tcp
+zk3       Up 4 minutes    0.0.0.0:2183->2183/tcp, [::]:2183->2183/tcp
+
+### роли серверов
+--- zk1: zkServer.sh status
+Client port found: 2181. Client address: localhost. Client SSL: false.
+Mode: follower
+--- zk2: zkServer.sh status
+Client port found: 2182. Client address: localhost. Client SSL: false.
+Mode: leader
+--- zk3: zkServer.sh status
+Client port found: 2183. Client address: localhost. Client SSL: false.
+Mode: follower
+
+### mntr лидера zk2
+zk_server_state	leader
+zk_znode_count	66
+zk_synced_followers	2
+
+### 13:21:21 останавливаю один сервер: docker stop zk1
+--- zk1: zkServer.sh status
+Error response from daemon: container b1d1149d3d2dbcda9e29799b408a524881431ea560654126c51d6a5ddf880291 is not running
+--- zk2: zkServer.sh status
+Client port found: 2182. Client address: localhost. Client SSL: false.
+Mode: leader
+--- zk3: zkServer.sh status
+Client port found: 2183. Client address: localhost. Client SSL: false.
+Mode: follower
+--- запись и чтение через zk2 при 2 из 3 серверов
+Created /stage2-one-down
+2 of 3 alive
+
+### 13:21:27 останавливаю второй: docker stop zk2 (остался только zk3)
+--- zk1: zkServer.sh status
+Error response from daemon: container b1d1149d3d2dbcda9e29799b408a524881431ea560654126c51d6a5ddf880291 is not running
+--- zk2: zkServer.sh status
+Error response from daemon: container 25cca23889013af0a3008d950fe47ebfe87294608e0f0988f748774d891b25f9 is not running
+--- zk3: zkServer.sh status
+Client port found: 2183. Client address: localhost. Client SSL: false.
+Error contacting service. It is probably not running.
+--- ruok/srvr у zk3
+imok
+This ZooKeeper instance is not currently serving requests
+
+--- попытка клиента через zk3 (timeout 15 s)
+   1 KeeperErrorCode = ConnectionLoss for /
+   1 Session establishment
+   1 Unable to read additional data from server sessionid 0x0
+(клиент не получил ответ: без кворума 2 из 3 сервер не обслуживает запросы)
+
+### 13:21:34 запускаю оба снова: docker start zk1 zk2
+--- zk1: zkServer.sh status
+Client port found: 2181. Client address: localhost. Client SSL: false.
+Mode: follower
+--- zk2: zkServer.sh status
+Client port found: 2182. Client address: localhost. Client SSL: false.
+Mode: follower
+--- zk3: zkServer.sh status
+Client port found: 2183. Client address: localhost. Client SSL: false.
+Mode: leader
+2 of 3 alive
+
+### эфемерный узел: окно 2 держит сессию zkCli, окно 1 проверяет
+--- 13:21:45 окно 1, пока окно 2 открыто: ls / и stat
+[ephemeral-demo, hw4, zookeeper]
+ephemeralOwner = 0x2000d666fcf0000
+dataLength = 13
+--- 13:21:50 окно 2 закрыто (quit). Вывод окна 2:
+Created /ephemeral-demo
+ephemeralOwner = 0x2000d666fcf0000
+10:21:50.186 [main] DEBUG org.apache.zookeeper.ZooKeeperMain -- Processing quit
+--- окно 1 после закрытия: ls / и get
+[hw4, zookeeper]
+Node does not exist: /ephemeral-demo
