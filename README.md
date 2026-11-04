@@ -4,6 +4,8 @@
 [ДЗ 3](https://github.com/Stalnoy-gigant/de-hw3-rustfs-mapreduce) с выбором лидера, чекпоинтами
 и защитой публикации результата по эпохе.
 
+**Отчёт: [`report/report.pdf`](report/report.pdf)** (собирается командой `.venv/bin/python src/build_report.py`).
+
 ## Состав репозитория
 
 | Путь | Что это |
@@ -17,6 +19,7 @@
 | `logs/` | журналы координаторов (`<прогон>_A.log`, `<прогон>_B.log`) и сценария (`<прогон>_scenario.log`) |
 | `outputs/` | выводы команд текстом: `stage2.txt`, `stage2_window2.txt`, `zk_pointers.txt` |
 | `report/screens/` | скриншоты терминала по всем этапам |
+| `report/report.pdf`, `report/img/` | отчёт и графики хронологии прогонов |
 
 ## Запуск
 
