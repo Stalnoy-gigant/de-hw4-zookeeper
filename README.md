@@ -32,7 +32,7 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 ## Этап 1. Установка
 
 Java на машине нет, поэтому выбран вариант с Docker: официальный образ `zookeeper:3.9.6`
-(Eclipse Temurin Java 17.0.21, `ZooKeeper 3.9.6` — видно в выводе `zkCli` в `outputs/stage2.txt`).
+(Eclipse Temurin Java 17.0.21, `ZooKeeper 3.9.6` — видно в выводе `zkCli`: строки `zookeeper.version=3.9.6` и `java.version=17.0.21` в `outputs/stage2_window2.txt` и на скриншоте `report/screens/03_one_down_create.png`).
 Три контейнера играют роль трёх распакованных копий: у каждого свой каталог `zk/zkN` с `conf/` и `data/`.
 
 ## Этап 2. Ансамбль
